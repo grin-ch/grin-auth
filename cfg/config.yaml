@@ -1,0 +1,9 @@
+server:
+  host: "127.0.0.1"
+  force_stop: 5 # 优雅退出等待5秒后强制退出
+  grpc:
+    port: 18081
+
+etcd:
+  endpoints: ["http://127.0.0.1:2379"]
+  timeout: 10
