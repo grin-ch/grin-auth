@@ -3,7 +3,27 @@ server:
   force_stop: 5 # 优雅退出等待5秒后强制退出
   grpc:
     port: 18081
+  captcha_server:
+    name: "captcha-service" # 服务名
+    log_path: "./logs/captcha/" # 日志目录
+    expires: 300  # 300秒后过期
+    port: 25
+    subject: "邮件标题" # 标题
+    format: "您的验证码为:%s, 5分钟内有效, 请保管好您的验证码,不要泄漏他人"  # 内容格式化字符串
+    host: "smtp.qq.com"
+    from: "email addr"
+    secret: "你的 secret"
+
+log:
+  level: 5 
+  color: false
+  caller: true
 
 etcd:
   endpoints: ["http://127.0.0.1:2379"]
   timeout: 10
+
+redis:
+  addr: 127.0.0.1:6379
+  pass:
+  db: 0

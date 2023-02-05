@@ -1,6 +1,14 @@
 package grpc
 
-import "google.golang.org/grpc"
+import (
+	"github.com/grin-ch/grin-api/api/grpc/captcha"
+	"github.com/grin-ch/grin-auth/cfg"
+	"google.golang.org/grpc"
+)
+
+var (
+	captchaClient captcha.CaptchaServiceClient
+)
 
 // 初始化客户端
 func initClients(resolve func(string) (*grpc.ClientConn, error), connectors ...ClientConnector) {
@@ -19,4 +27,11 @@ func initClient(resolve func(string) (*grpc.ClientConn, error),
 	fn(conn)
 }
 
-type ClientConnector func() (string, func(*grpc.ClientConn))
+type ClientConnector func() (string, func(conn *grpc.ClientConn))
+
+func CaptchaConn() (string, func(*grpc.ClientConn)) {
+	name := cfg.Config.Server.CaptchaServer.Name
+	return name, func(cc *grpc.ClientConn) {
+		captchaClient = captcha.NewCaptchaServiceClient(cc)
+	}
+}

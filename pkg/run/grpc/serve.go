@@ -3,7 +3,14 @@ package grpc
 import (
 	"fmt"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
+
+	"github.com/grin-ch/grin-auth/cfg"
+	etcd "github.com/grin-ch/grin-etcd-center"
+	"github.com/grin-ch/grin-utils/log"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
@@ -12,10 +19,6 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/resolver"
-
-	"github.com/grin-ch/grin-auth/cfg"
-	etcd "github.com/grin-ch/grin-etcd-center"
-	"github.com/grin-ch/grin-utils/log"
 )
 
 // RunServer 运行服务
@@ -42,8 +45,6 @@ func grpcServer(serverName string, r Registrar, connectors ...ClientConnector) e
 		),
 	)
 	gracefulShutdown(s)
-	// 注册grpc服务
-	registryServer(s, r)
 
 	// 获取注册中心连接
 	etcdCenter, err := etcd.NewEtcdCenter(cfg.Config.Etcd.Endpoints, cfg.Config.Etcd.Timeout)
@@ -67,6 +68,8 @@ func grpcServer(serverName string, r Registrar, connectors ...ClientConnector) e
 	}()
 	// 初始化grpc客户端
 	initClients(etcdResolver(etcdCenter.Builder()), connectors...)
+	// 注册grpc服务
+	registryServer(s, r)
 
 	log.Logger.Infof("%s is running: %s", serverName,
 		fmt.Sprintf("%s:%d", cfg.Config.Server.Host, cfg.Config.Server.Grpc.Port))
@@ -87,4 +90,22 @@ func etcdResolver(builder resolver.Builder) func(string) (*grpc.ClientConn, erro
 			),
 			grpc.WithTransportCredentials(insecure.NewCredentials()))
 	}
+}
+
+// 优雅退出
+func gracefulShutdown(svc *grpc.Server) {
+	go func() {
+		quit := make(chan os.Signal, 1)
+		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+		sign := <-quit
+
+		go func() {
+			time.Sleep(time.Duration(cfg.Config.Server.ForceStop) * time.Second)
+			log.Logger.Errorf("grpc server force stop: sign:%v", sign)
+			os.Exit(-1)
+		}()
+		// 关闭服务链接
+		svc.GracefulStop()
+		log.Logger.Infof("grpc server shutdown: %v", sign)
+	}()
 }
