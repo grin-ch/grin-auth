@@ -1,11 +1,11 @@
 server:
   host: "127.0.0.1"
   force_stop: 5 # 优雅退出等待5秒后强制退出
-  grpc:
-    port: 18081
   captcha_server:
-    name: "captcha-service" # 服务名
-    log_path: "./logs/captcha/" # 日志目录
+    info:
+      name: "captcha-service" # 服务名
+      grpc_port: 18001
+      log_path: "./logs/captcha/" # 日志目录
     expires: 300  # 300秒后过期
     port: 25
     subject: "邮件标题" # 标题
@@ -14,9 +14,13 @@ server:
     from: "email addr"
     secret: "你的 secret"
   account_server:
-    name: "account-service" # 服务名
-    log_path: "./logs/account/" # 日志目录
-
+    info:
+      name: "account-service" # 服务名
+      grpc_port: 18002
+      log_path: "./logs/account/" # 日志目录
+    expire: 7200
+    signed: "grin"
+    issuer: "grin"
 log:
   level: 5 
   color: false

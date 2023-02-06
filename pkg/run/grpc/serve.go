@@ -22,14 +22,14 @@ import (
 )
 
 // RunServer 运行服务
-func RunServer(serverName string, r Registrar, connectors ...ClientConnector) error {
-	return grpcServer(serverName, r, connectors...)
+func RunServer(serverName string, grpcPort int, r Registrar, connectors ...ClientConnector) error {
+	return grpcServer(serverName, grpcPort, r, connectors...)
 }
 
 // 运行grpc服务
-func grpcServer(serverName string, r Registrar, connectors ...ClientConnector) error {
+func grpcServer(serverName string, grpcPort int, r Registrar, connectors ...ClientConnector) error {
 	// grpc listener
-	grpcListener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", cfg.Config.Server.Grpc.Port))
+	grpcListener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", grpcPort))
 	if err != nil {
 		log.Logger.Errorf("tcp listen err:%s", err.Error())
 		return err
@@ -53,7 +53,7 @@ func grpcServer(serverName string, r Registrar, connectors ...ClientConnector) e
 		return err
 	}
 	// 服务注册
-	registrar := etcdCenter.Registrar(serverName, cfg.Config.Server.Host, cfg.Config.Server.Grpc.Port,
+	registrar := etcdCenter.Registrar(serverName, cfg.Config.Server.Host, grpcPort,
 		etcd.WithLogger(func(err error) {
 			log.Logger.Errorf("etcd err:%v", err)
 		}))
@@ -72,7 +72,7 @@ func grpcServer(serverName string, r Registrar, connectors ...ClientConnector) e
 	registryServer(s, r)
 
 	log.Logger.Infof("%s is running: %s", serverName,
-		fmt.Sprintf("%s:%d", cfg.Config.Server.Host, cfg.Config.Server.Grpc.Port))
+		fmt.Sprintf("%s:%d", cfg.Config.Server.Host, grpcPort))
 	return s.Serve(grpcListener)
 }
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/go-redis/redis"
@@ -175,8 +176,8 @@ func (s *captchaService) verifyCaptcha(c internal.Captcha) (bool, error) {
 	if err := cmd.Scan(&val); err != nil && err != redis.Nil {
 		return false, err
 	}
-	if c.Content != val.Content ||
-		c.Purpose != val.Purpose {
+	if c.Purpose != val.Purpose ||
+		!strings.EqualFold(c.Content, val.Content) {
 		return false, nil
 	}
 

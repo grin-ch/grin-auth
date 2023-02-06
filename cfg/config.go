@@ -1,29 +1,34 @@
 package cfg
 
 import (
-	"flag"
 	"fmt"
 	"io/ioutil"
+	"os"
+	"path"
 
 	"gopkg.in/yaml.v3"
 )
 
 const (
-	filename = "/config.yaml"
+	grin_config_path         = "GRIN_CFG_PATH"
+	grin_default_config_path = "GRIN_DEFAULT_CFG_PATH"
+	filename                 = "config.yaml"
 )
 
 var Config config
 
+type serverInfo struct {
+	Name     string `yaml:"name"`
+	GrpcPort int    `yaml:"grpc_port"`
+	LogPath  string `yaml:"log_path"`
+}
+
 type serverCfg struct {
 	Host      string `yaml:"host"`
 	ForceStop int    `yaml:"force_stop"`
-	Grpc      struct {
-		Port int `yaml:"port"`
-	} `yaml:"grpc"`
 
 	CaptchaServer struct {
-		Name    string `yaml:"name"`
-		LogPath string `yaml:"log_path"`
+		Info serverInfo `yaml:"info"`
 
 		Expires int    `yaml:"expires"`
 		Port    int    `yaml:"port"`
@@ -35,8 +40,11 @@ type serverCfg struct {
 	} `yaml:"captcha_server"`
 
 	AccountServer struct {
-		Name    string `yaml:"name"`
-		LogPath string `yaml:"log_path"`
+		Info serverInfo `yaml:"info"`
+
+		Expires int    `yaml:"expires"`
+		Signed  string `yaml:"signed"`
+		Issuer  string `yaml:"issuer"`
 	} `yaml:"account_server"`
 }
 
@@ -69,12 +77,16 @@ type config struct {
 	} `yaml:"mysql"`
 }
 
+func (cfg config) Dsn() string {
+	db := cfg.Mysql
+	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", db.User, db.Passwd, db.Host, db.Port, db.Name) +
+		"?charset=utf8mb4&parseTime=True&loc=Local&timeout=30s"
+}
+
 func InitConfig() {
-	var path, defaultPath string
-	flag.StringVar(&path, "cfg_path", "./cfg", "log path")
-	flag.StringVar(&defaultPath, "default_path", ".config", "default log path")
-	flag.Parse()
-	data, err := ioutil.ReadFile(path + filename)
+	envPath := os.Getenv(grin_config_path)
+	defaultPath := os.Getenv(grin_default_config_path)
+	data, err := ioutil.ReadFile(path.Join(envPath, filename))
 	if err != nil {
 		panic(err)
 	}
@@ -86,14 +98,8 @@ func InitConfig() {
 	initDefaultConfig(defaultPath)
 }
 
-func (cfg config) Dsn() string {
-	db := cfg.Mysql
-	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", db.User, db.Passwd, db.Host, db.Port, db.Name) +
-		"?charset=utf8mb4&parseTime=True&loc=Local&timeout=30s"
-}
-
 func initDefaultConfig(defaultPath string) {
-	data, err := ioutil.ReadFile(defaultPath)
+	data, err := ioutil.ReadFile(path.Join(defaultPath, filename))
 	if err != nil {
 		return
 	}

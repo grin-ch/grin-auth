@@ -5,13 +5,15 @@ go 1.18
 require (
 	entgo.io/ent v0.11.7
 	github.com/afocus/captcha v0.0.0-20191010092841-4bd1f21c8868
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/go-sql-driver/mysql v1.7.0
 	github.com/grin-ch/grin-api v0.0.0-20230205150453-8710d28d250b
-	github.com/grin-ch/grin-etcd-center v0.0.0-20230203175508-ef12e1978e59
+	github.com/grin-ch/grin-etcd-center v0.0.0-20230207140926-0b87bc51a8a3
 	github.com/grin-ch/grin-utils v0.0.0-20230203152434-8cb76f08e538
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible
+	golang.org/x/crypto v0.0.0-20220517005047-85d78b3ac167
 	google.golang.org/grpc v1.52.3
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -20,6 +22,7 @@ require (
 	ariga.io/atlas v0.9.1-0.20230119145809-92243f7c55cb // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
+	github.com/bwmarrin/snowflake v0.3.0 // indirect
 	github.com/coreos/go-semver v0.3.0 // indirect
 	github.com/coreos/go-systemd/v22 v22.3.2 // indirect
 	github.com/go-openapi/inflect v0.19.0 // indirect

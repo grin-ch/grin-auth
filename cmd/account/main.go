@@ -22,11 +22,13 @@ func main() {
 		log.WithLevel(cfg.Config.Log.Level),
 		log.WithColor(cfg.Config.Log.Color),
 		log.WithCaller(cfg.Config.Log.Caller),
-		log.WithPath(scfg.LogPath),
+		log.WithPath(scfg.Info.LogPath),
 	)
 
 	grpc.RunServer(
-		scfg.Name,
-		grpc.RegistryCaptchaServer(),
+		scfg.Info.Name,
+		scfg.Info.GrpcPort,
+		grpc.RegistryAccountServices(),
+		grpc.CaptchaConn,
 	)
 }
