@@ -13,6 +13,9 @@ server:
     host: "smtp.qq.com"
     from: "email addr"
     secret: "你的 secret"
+  account_server:
+    name: "account-service" # 服务名
+    log_path: "./logs/account/" # 日志目录
 
 log:
   level: 5 
@@ -27,3 +30,10 @@ redis:
   addr: 127.0.0.1:6379
   pass:
   db: 0
+
+mysql:
+  port: 3306
+  host: 127.0.0.1
+  name: "dbname"
+  user: "username"
+  passwd: "password"

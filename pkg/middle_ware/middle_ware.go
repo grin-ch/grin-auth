@@ -2,6 +2,7 @@ package middle_ware
 
 import (
 	"github.com/grin-ch/grin-auth/cfg"
+	"github.com/grin-ch/grin-auth/pkg/middle_ware/mysql"
 	"github.com/grin-ch/grin-auth/pkg/middle_ware/redis"
 )
 
@@ -18,5 +19,11 @@ func InitMiddleWare(initFuncs ...initFunc) {
 func InitRedis() initFunc {
 	return func() error {
 		return redis.RedisInit(cfg.Config.Redis.Addr, cfg.Config.Redis.Pass, cfg.Config.Redis.DB)
+	}
+}
+
+func InitMysql(dsn string) initFunc {
+	return func() error {
+		return mysql.MysqlInit(dsn)
 	}
 }

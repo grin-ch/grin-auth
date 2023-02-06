@@ -2,6 +2,7 @@ package cfg
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 
 	"gopkg.in/yaml.v3"
@@ -32,6 +33,11 @@ type serverCfg struct {
 		From    string `yaml:"from"`
 		Secret  string `yaml:"secret"`
 	} `yaml:"captcha_server"`
+
+	AccountServer struct {
+		Name    string `yaml:"name"`
+		LogPath string `yaml:"log_path"`
+	} `yaml:"account_server"`
 }
 
 type config struct {
@@ -53,6 +59,14 @@ type config struct {
 		Pass string `yaml:"pass"`
 		DB   int    `yaml:"db"`
 	} `yaml:"redis"`
+
+	Mysql struct {
+		Port   int    `yaml:"port"`
+		Host   string `yaml:"host"`
+		Name   string `yaml:"name"`
+		User   string `yaml:"user"`
+		Passwd string `yaml:"passwd"`
+	} `yaml:"mysql"`
 }
 
 func InitConfig() {
@@ -70,6 +84,12 @@ func InitConfig() {
 	}
 
 	initDefaultConfig(defaultPath)
+}
+
+func (cfg config) Dsn() string {
+	db := cfg.Mysql
+	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", db.User, db.Passwd, db.Host, db.Port, db.Name) +
+		"?charset=utf8mb4&parseTime=True&loc=Local&timeout=30s"
 }
 
 func initDefaultConfig(defaultPath string) {

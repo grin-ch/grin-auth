@@ -2,6 +2,7 @@
 
 servers=(
     "captcha"
+    "account"
 )
 wkdir=$(cd $(dirname $0); pwd)
 cd $wkdir/..
