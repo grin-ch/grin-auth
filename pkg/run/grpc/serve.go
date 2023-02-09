@@ -11,8 +11,11 @@ import (
 	"github.com/grin-ch/grin-auth/cfg"
 	etcd "github.com/grin-ch/grin-etcd-center"
 	"github.com/grin-ch/grin-utils/log"
+	"github.com/sirupsen/logrus"
 
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
+	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
+	grpc_logrus "github.com/grpc-ecosystem/go-grpc-middleware/logging/logrus"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/balancer/roundrobin"
@@ -35,13 +38,24 @@ func grpcServer(serverName string, grpcPort int, r Registrar, connectors ...Clie
 		return err
 	}
 
+	opts := []grpc_logrus.Option{
+		grpc_logrus.WithTimestampFormat("2006-01-02 15:04:05.000"),
+		grpc_logrus.WithDurationField(func(duration time.Duration) (key string, value interface{}) {
+			return "grpc.cost", duration.Nanoseconds()
+		}),
+	}
+
 	// grpc server
 	s := grpc.NewServer(
 		grpc_middleware.WithUnaryServerChain(
 			grpc_recovery.UnaryServerInterceptor(grpc_recovery.WithRecoveryHandler(recoveryFunc)),
+			grpc_auth.UnaryServerInterceptor(authFunc),
+			grpc_logrus.UnaryServerInterceptor(logrus.NewEntry(log.Logger), opts...),
 		),
 		grpc_middleware.WithStreamServerChain(
 			grpc_recovery.StreamServerInterceptor(grpc_recovery.WithRecoveryHandler(recoveryFunc)),
+			grpc_auth.StreamServerInterceptor(authFunc),
+			grpc_logrus.StreamServerInterceptor(logrus.NewEntry(log.Logger), opts...),
 		),
 	)
 	gracefulShutdown(s)

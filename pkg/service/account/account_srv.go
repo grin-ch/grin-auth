@@ -2,6 +2,7 @@ package account
 
 import (
 	"context"
+	"time"
 
 	"github.com/grin-ch/grin-auth/pkg/model"
 	"github.com/grin-ch/grin-auth/pkg/model/user"
@@ -46,4 +47,10 @@ func (s *dbServer) CreateUser(ctx context.Context,
 // FindUserByAccount 查询用户
 func (s *dbServer) FindUserByAccount(ctx context.Context, account string) (*model.User, error) {
 	return s.client.User.Query().Where(user.Or(user.Email(account), user.Phone(account))).WithUserData().Only(ctx)
+}
+
+func (s *dbServer) SaveLog(ctx context.Context, ipaddr string, id int, t time.Time) error {
+	_, err := s.client.LoginLog.Create().
+		SetIPAddr("").SetLoginTime(t).SetUserID(id).Save(ctx)
+	return err
 }

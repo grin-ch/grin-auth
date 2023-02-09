@@ -79,6 +79,8 @@ github.com/grin-ch/grin-etcd-center v0.0.0-20230207140926-0b87bc51a8a3 h1:E6wNe5
 github.com/grin-ch/grin-etcd-center v0.0.0-20230207140926-0b87bc51a8a3/go.mod h1:lmx32uQMKpfWeA+XijS+UtnL0/+FrMxKx3Ucr3hXqSc=
 github.com/grin-ch/grin-utils v0.0.0-20230203152434-8cb76f08e538 h1:WTUE+TPSHjAmg0AlX76NYgP7lLozTNVXREWoOK2uFO8=
 github.com/grin-ch/grin-utils v0.0.0-20230203152434-8cb76f08e538/go.mod h1:/45LkbsdAOIsAwPfk20BGV7DiuuVJQ7mjLUJX2BjSIc=
+github.com/grin-ch/grin-utils v0.0.0-20230209150035-87743e04d283 h1:AShR5bZRS7aFgWaqdG25wpCK2RSqyG08jdWQnTCw+rk=
+github.com/grin-ch/grin-utils v0.0.0-20230209150035-87743e04d283/go.mod h1:/45LkbsdAOIsAwPfk20BGV7DiuuVJQ7mjLUJX2BjSIc=
 github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 h1:+9834+KizmvFV7pXQGSXQTsaWhq2GjuNUt0aUU0YBYw=
 github.com/grpc-ecosystem/go-grpc-middleware v1.3.0/go.mod h1:z0ButlSOZa5vEBq9m2m2hlwIgKw+rp3sdCBRoJY+30Y=
 github.com/hashicorp/hcl/v2 v2.13.0 h1:0Apadu1w6M11dyGFxWnmhhcMjkbAiKCv7G1r/2QgCNc=

@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-redis/redis"
 	"github.com/grin-ch/grin-api/api/grpc/captcha"
+	"github.com/grin-ch/grin-auth/pkg/auth"
 	"github.com/grin-ch/grin-auth/pkg/service/internal"
 	"github.com/grin-ch/grin-auth/pkg/util"
 	"github.com/grin-ch/grin-utils/log"
@@ -37,6 +38,7 @@ func (e *captchaEmail) Subject() string      { return e.subject }
 func (e *captchaEmail) Body() []byte         { return []byte(e.body) }
 
 type captchaService struct {
+	auth.Unauther
 	redisClient *redis.Client
 
 	expires int

@@ -2,6 +2,7 @@ package account
 
 import (
 	"context"
+	"time"
 
 	"github.com/grin-ch/grin-api/api/grpc/account"
 	"github.com/grin-ch/grin-api/api/grpc/captcha"
@@ -17,6 +18,7 @@ import (
 )
 
 type userService struct {
+	auth.Unauther
 	*dbServer
 	expires int
 	signed  string
@@ -35,12 +37,6 @@ func NewUserService(dbClient *model.Client, expires int, signed, issuer string,
 		issuer:        issuer,
 		captchaClient: captchaClient,
 	}
-}
-
-// AuthFuncOverride 覆盖authFunc
-// 跳过部分接口的权限验证
-func (*userService) AuthFuncOverride(ctx context.Context, fullMethodName string) (context.Context, error) {
-	return ctx, nil
 }
 
 // 注册
@@ -121,19 +117,23 @@ func (s *userService) SignIn(ctx context.Context, req *account.SignInReq) (*acco
 	if err != nil {
 		return nil, status.Errorf(codes.Unauthenticated, "account or password invalid")
 	}
-
+	ip := util.ClientIpFromCtx(ctx)
 	token, err := auth.GenerateJWT(s.expires, s.signed, s.issuer, auth.RoleBase{
 		Id:       user.ID,
 		UUID:     tool.MustUUIDv4(),
 		Avatar:   user.Edges.UserData.AvatarURL,
 		Nickname: user.Edges.UserData.Nickname,
 		Sex:      user.Edges.UserData.Sex.String(),
+		Ip:       ip,
 	})
 	if err != nil {
 		log.Logger.Errorf("generate token err:%v", err)
 		return nil, status.Errorf(codes.Internal, "generate token error")
 	}
-
+	err = s.SaveLog(ctx, ip, user.ID, time.Now())
+	if err != nil {
+		log.Logger.Errorf("login log save err:%v", err)
+	}
 	return &account.SignInRsp{
 		Token: token,
 	}, nil

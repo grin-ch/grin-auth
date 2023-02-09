@@ -17,7 +17,7 @@ fi
 
 if [[ "${servers[@]}"  =~ "${target}" ]]; then
     echo "run.sh pid:${pid}"
-    echo "target:${target} in serve"
+    echo "server:${target} in serve"
     go run ./cmd/$target
 elif [[ ! "${servers[@]}"  =~ "${target}" ]]; then
     echo "target $target not exists"

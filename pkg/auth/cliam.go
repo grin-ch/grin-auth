@@ -37,9 +37,9 @@ func GenerateJWT(expires int, signed, issuer string, rBase RoleBase) (string, er
 	return token, err
 }
 
-func ParseJWT(token, signed string) (*Cliams, error) {
+func ParseJWT(token string) (*Cliams, error) {
 	tokenClaims, err := jwt.ParseWithClaims(token, &Cliams{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(signed), nil
+		return []byte{}, nil
 	})
 	if err != nil {
 		return nil, err
