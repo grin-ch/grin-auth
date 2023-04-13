@@ -20,21 +20,23 @@ import (
 type userService struct {
 	auth.Unauther
 	*dbServer
-	expires int
-	signed  string
-	issuer  string
+	expires    int
+	signed     string
+	issuer     string
+	forceCheck bool
 
 	captchaClient captcha.CaptchaServiceClient
 }
 
 // NewUserService  userService impl
-func NewUserService(dbClient *model.Client, expires int, signed, issuer string,
+func NewUserService(dbClient *model.Client, expires int, signed, issuer string, forceCheck bool,
 	captchaClient captcha.CaptchaServiceClient) account.UserServiceServer {
 	return &userService{
 		dbServer:      newDbServer(dbClient),
 		expires:       expires,
 		signed:        signed,
 		issuer:        issuer,
+		forceCheck:    forceCheck,
 		captchaClient: captchaClient,
 	}
 }
@@ -91,17 +93,19 @@ func (s *userService) SignUp(ctx context.Context, req *account.SignUpReq) (*acco
 // 登入
 func (s *userService) SignIn(ctx context.Context, req *account.SignInReq) (*account.SignInRsp, error) {
 	// 验证码校验
-	rsp, err := s.captchaClient.Verify(ctx, &captcha.VerifyReq{
-		Key:     req.CaptchaKey,
-		Value:   req.Captcha,
-		Purpose: captcha.Purpose_SIGN_IN,
-	})
-	if err != nil {
-		log.Logger.Errorf("captcha verify err:%v", err)
-		return nil, status.Errorf(codes.Internal, "captcha verify error")
-	}
-	if !rsp.Success {
-		return nil, status.Errorf(codes.InvalidArgument, "captcha invalid")
+	if s.forceCheck || req.CaptchaKey != "" {
+		rsp, err := s.captchaClient.Verify(ctx, &captcha.VerifyReq{
+			Key:     req.CaptchaKey,
+			Value:   req.Captcha,
+			Purpose: captcha.Purpose_SIGN_IN,
+		})
+		if err != nil {
+			log.Logger.Errorf("captcha verify err:%v", err)
+			return nil, status.Errorf(codes.Internal, "captcha verify error")
+		}
+		if !rsp.Success {
+			return nil, status.Errorf(codes.InvalidArgument, "captcha invalid")
+		}
 	}
 
 	// 密码校验

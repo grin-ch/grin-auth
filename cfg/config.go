@@ -3,8 +3,10 @@ package cfg
 import (
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"path"
+	"time"
 
 	"gopkg.in/yaml.v3"
 )
@@ -17,18 +19,29 @@ const (
 
 var Config config
 
-type serverInfo struct {
-	Name     string `yaml:"name"`
-	GrpcPort int    `yaml:"grpc_port"`
-	LogPath  string `yaml:"log_path"`
+type ServerInfo struct {
+	Name        string `yaml:"name"`
+	Port        int    `yaml:"port"`
+	LogPath     string `yaml:"log_path"`
+	PprofEnable bool   `yaml:"pprof_enable"`
+	PprofPort   int    `yaml:"pprof_port"`
 }
 
 type serverCfg struct {
 	Host      string `yaml:"host"`
 	ForceStop int    `yaml:"force_stop"`
 
+	HttpServer struct {
+		Info ServerInfo `yaml:"info"`
+
+		Mode           string         `yaml:"mode"`
+		Debug          bool           `yaml:"debug"`
+		Timeout        int            `yaml:"timeout"`
+		TimeoutAppoint map[string]int `yaml:"timeout_appoint"`
+	} `yaml:"http_server"`
+
 	CaptchaServer struct {
-		Info serverInfo `yaml:"info"`
+		Info ServerInfo `yaml:"info"`
 
 		Expires int    `yaml:"expires"`
 		Port    int    `yaml:"port"`
@@ -40,11 +53,12 @@ type serverCfg struct {
 	} `yaml:"captcha_server"`
 
 	AccountServer struct {
-		Info serverInfo `yaml:"info"`
+		Info ServerInfo `yaml:"info"`
 
-		Expires int    `yaml:"expires"`
-		Signed  string `yaml:"signed"`
-		Issuer  string `yaml:"issuer"`
+		ForceCheck bool   `yaml:"force_check"` // 强制登入校验验证码
+		Expires    int    `yaml:"expires"`
+		Signed     string `yaml:"signed"`
+		Issuer     string `yaml:"issuer"`
 	} `yaml:"account_server"`
 }
 
@@ -84,6 +98,8 @@ func (cfg config) Dsn() string {
 }
 
 func InitConfig() {
+	rand.Seed(time.Now().UnixNano())
+
 	envPath := os.Getenv(grin_config_path)
 	defaultPath := os.Getenv(grin_default_config_path)
 	data, err := ioutil.ReadFile(path.Join(envPath, filename))

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/grin-ch/grin-auth/cfg"
+	"github.com/grin-ch/grin-auth/pkg/util"
 	etcd "github.com/grin-ch/grin-etcd-center"
 	"github.com/grin-ch/grin-utils/log"
 	"github.com/sirupsen/logrus"
@@ -25,12 +26,18 @@ import (
 )
 
 // RunServer 运行服务
-func RunServer(serverName string, grpcPort int, r Registrar, connectors ...ClientConnector) error {
-	return grpcServer(serverName, grpcPort, r, connectors...)
+func RunServer(scfg cfg.ServerInfo, r Registrar, connectors ...ClientConnector) error {
+	return grpcServer(
+		scfg.PprofEnable,
+		scfg.PprofPort,
+		scfg.Name,
+		scfg.Port,
+		r,
+		connectors...)
 }
 
 // 运行grpc服务
-func grpcServer(serverName string, grpcPort int, r Registrar, connectors ...ClientConnector) error {
+func grpcServer(pprofEnable bool, pprofPort int, serverName string, grpcPort int, r Registrar, connectors ...ClientConnector) error {
 	// grpc listener
 	grpcListener, err := net.Listen("tcp", fmt.Sprintf("0.0.0.0:%d", grpcPort))
 	if err != nil {
@@ -61,7 +68,7 @@ func grpcServer(serverName string, grpcPort int, r Registrar, connectors ...Clie
 	gracefulShutdown(s)
 
 	// 获取注册中心连接
-	etcdCenter, err := etcd.NewEtcdCenter(cfg.Config.Etcd.Endpoints, cfg.Config.Etcd.Timeout)
+	etcdCenter, err := CreateEtcdCenter(cfg.Config.Etcd.Endpoints, cfg.Config.Etcd.Timeout)
 	if err != nil {
 		log.Logger.Errorf("new etcd client err:%s", err.Error())
 		return err
@@ -85,6 +92,7 @@ func grpcServer(serverName string, grpcPort int, r Registrar, connectors ...Clie
 	// 注册grpc服务
 	registryServer(s, r)
 
+	util.RunPprof(pprofEnable, pprofPort)
 	log.Logger.Infof("%s is running: %s", serverName,
 		fmt.Sprintf("%s:%d", cfg.Config.Server.Host, grpcPort))
 	return s.Serve(grpcListener)
@@ -122,4 +130,12 @@ func gracefulShutdown(svc *grpc.Server) {
 		svc.GracefulStop()
 		log.Logger.Infof("grpc server shutdown: %v", sign)
 	}()
+}
+
+func CreateEtcdCenter(endpoints []string, timeout int) (etcd.IEtcdCenter, error) {
+	return etcd.NewEtcdCenter(endpoints, timeout)
+}
+
+func InitClients(etcdCenter etcd.IEtcdCenter, connectors ...ClientConnector) {
+	initClients(etcdResolver(etcdCenter.Builder()), connectors...)
 }

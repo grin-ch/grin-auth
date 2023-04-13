@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	userClient    account.UserServiceClient
-	captchaClient captcha.CaptchaServiceClient
+	UserClient    account.UserServiceClient
+	CaptchaClient captcha.CaptchaServiceClient
 )
 
 // 初始化客户端
@@ -31,16 +31,23 @@ func initClient(resolve func(string) (*grpc.ClientConn, error),
 
 type ClientConnector func() (string, func(conn *grpc.ClientConn))
 
+func AllConn() []ClientConnector {
+	return []ClientConnector{
+		CaptchaConn,
+		UserConn,
+	}
+}
+
 func CaptchaConn() (string, func(*grpc.ClientConn)) {
 	name := cfg.Config.Server.CaptchaServer.Info.Name
 	return name, func(cc *grpc.ClientConn) {
-		captchaClient = captcha.NewCaptchaServiceClient(cc)
+		CaptchaClient = captcha.NewCaptchaServiceClient(cc)
 	}
 }
 
 func UserConn() (string, func(*grpc.ClientConn)) {
 	name := cfg.Config.Server.AccountServer.Info.Name
 	return name, func(cc *grpc.ClientConn) {
-		userClient = account.NewUserServiceClient(cc)
+		UserClient = account.NewUserServiceClient(cc)
 	}
 }

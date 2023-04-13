@@ -18,7 +18,7 @@ var (
 func TestMain(m *testing.M) {
 	cfg.InitConfig()
 
-	host := fmt.Sprintf("%s:%d", cfg.Config.Server.Host, cfg.Config.Server.CaptchaServer.Info.GrpcPort)
+	host := fmt.Sprintf("%s:%d", cfg.Config.Server.Host, cfg.Config.Server.CaptchaServer.Info.Port)
 	fmt.Println(host)
 	conn, err := grpc.Dial(host, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {

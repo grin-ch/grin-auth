@@ -2,17 +2,13 @@ package main
 
 import (
 	"github.com/grin-ch/grin-auth/cfg"
-	"github.com/grin-ch/grin-auth/pkg/middle_ware"
-	"github.com/grin-ch/grin-auth/pkg/run/grpc"
+	grin_http "github.com/grin-ch/grin-auth/pkg/run/http"
 	"github.com/grin-ch/grin-utils/log"
 )
 
 func main() {
 	cfg.InitConfig()
-	scfg := cfg.Config.Server.CaptchaServer
-	middle_ware.InitMiddleWare(
-		middle_ware.InitRedis(),
-	)
+	scfg := cfg.Config.Server.HttpServer
 
 	log.InitLogger(
 		log.WithLevel(cfg.Config.Log.Level),
@@ -21,8 +17,5 @@ func main() {
 		log.WithPath(scfg.Info.LogPath),
 	)
 
-	grpc.RunServer(
-		scfg.Info,
-		grpc.RegistryCaptchaServices(),
-	)
+	grin_http.RunServer()
 }

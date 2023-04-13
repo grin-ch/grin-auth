@@ -1,10 +1,22 @@
 server:
   host: "127.0.0.1"
   force_stop: 5 # 优雅退出等待5秒后强制退出
+  http_server:
+    info:
+      name: "devbox-service" # 服务名
+      port: 8080
+      log_path: "./logs/devbox/" # 日志目录
+      pprof_enable: true
+      pprof_port: 6060
+    mode: "debug"
+    debug: true
+    timeout: 3
+    timeout_appoint:
+      health: 5
   captcha_server:
     info:
       name: "captcha-service" # 服务名
-      grpc_port: 18001
+      port: 18001
       log_path: "./logs/captcha/" # 日志目录
     expires: 300  # 300秒后过期
     port: 25
@@ -16,7 +28,7 @@ server:
   account_server:
     info:
       name: "account-service" # 服务名
-      grpc_port: 18002
+      port: 18002
       log_path: "./logs/account/" # 日志目录
     expire: 7200
     signed: "grin"

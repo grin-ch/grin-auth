@@ -6,6 +6,11 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
+const (
+	TokenKey  = "Authorization"
+	CliamsKey = "CliamsKey"
+)
+
 type RoleBase struct {
 	Id       int    `json:"id"`
 	UUID     string `json:"uuid"`

@@ -32,6 +32,6 @@ func RegistryAccountServices() Registrar {
 	return func(svc *grpc.Server) {
 		scfg := cfg.Config.Server.AccountServer
 		account.RegisterUserServiceServer(svc,
-			account_impl.NewUserService(mysql.Client, scfg.Expires, scfg.Signed, scfg.Issuer, captchaClient))
+			account_impl.NewUserService(mysql.Client, scfg.Expires, scfg.Signed, scfg.Issuer, scfg.ForceCheck, CaptchaClient))
 	}
 }

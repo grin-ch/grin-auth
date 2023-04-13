@@ -1,6 +1,7 @@
 #!/bin/bash
 
 servers=(
+    "web"
     "captcha"
     "account"
 )

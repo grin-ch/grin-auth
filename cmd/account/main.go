@@ -1,9 +1,6 @@
 package main
 
 import (
-	"math/rand"
-	"time"
-
 	"github.com/grin-ch/grin-auth/cfg"
 	"github.com/grin-ch/grin-auth/pkg/middle_ware"
 	"github.com/grin-ch/grin-auth/pkg/run/grpc"
@@ -11,7 +8,6 @@ import (
 )
 
 func main() {
-	rand.Seed(time.Now().UnixNano())
 	cfg.InitConfig()
 	scfg := cfg.Config.Server.AccountServer
 	middle_ware.InitMiddleWare(
@@ -26,8 +22,7 @@ func main() {
 	)
 
 	grpc.RunServer(
-		scfg.Info.Name,
-		scfg.Info.GrpcPort,
+		scfg.Info,
 		grpc.RegistryAccountServices(),
 		grpc.CaptchaConn,
 	)
